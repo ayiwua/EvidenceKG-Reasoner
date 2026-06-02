@@ -1,0 +1,76 @@
+{"entity_id":"subnet_office_a","name":"10.12.3.0/24","type":"subnet","description":"Office network subnet in building A.","attributes":{"asset_zone":"office_network","location":"building_A"}}
+{"entity_id":"subnet_prod_a","name":"10.20.8.0/24","type":"subnet","description":"Production application subnet in region A.","attributes":{"asset_zone":"prod_network","location":"region_A"}}
+{"entity_id":"subnet_data_a","name":"10.30.5.0/24","type":"subnet","description":"Database subnet in region A.","attributes":{"asset_zone":"data_network","location":"region_A"}}
+{"entity_id":"subnet_dmz","name":"172.16.9.0/24","type":"subnet","description":"DMZ subnet for externally exposed APIs.","attributes":{"asset_zone":"dmz","location":"region_A"}}
+{"entity_id":"ip_001","name":"10.12.3.21","type":"ip","description":"Office observed IP for payment API access.","attributes":{"subnet":"10.12.3.0/24","asset_zone":"office_network","last_seen":"2026-05-12","location":"building_A"}}
+{"entity_id":"ip_002","name":"10.20.8.11","type":"ip","description":"Production IP for payment service node.","attributes":{"subnet":"10.20.8.0/24","asset_zone":"prod_network","last_seen":"2026-05-12","location":"region_A"}}
+{"entity_id":"ip_003","name":"10.20.8.12","type":"ip","description":"Production IP for auth service node.","attributes":{"subnet":"10.20.8.0/24","asset_zone":"prod_network","last_seen":"2026-05-11","location":"region_A"}}
+{"entity_id":"ip_004","name":"10.20.8.13","type":"ip","description":"Production IP for order service node.","attributes":{"subnet":"10.20.8.0/24","asset_zone":"prod_network","last_seen":"2026-05-12","location":"region_A"}}
+{"entity_id":"ip_005","name":"10.30.5.31","type":"ip","description":"Database IP for customer data.","attributes":{"subnet":"10.30.5.0/24","asset_zone":"data_network","last_seen":"2026-05-10","location":"region_A"}}
+{"entity_id":"ip_006","name":"10.30.5.32","type":"ip","description":"Database IP for order data.","attributes":{"subnet":"10.30.5.0/24","asset_zone":"data_network","last_seen":"2026-05-10","location":"region_A"}}
+{"entity_id":"ip_007","name":"172.16.9.41","type":"ip","description":"DMZ IP for gateway API.","attributes":{"subnet":"172.16.9.0/24","asset_zone":"dmz","last_seen":"2026-05-09","location":"region_A"}}
+{"entity_id":"ip_008","name":"172.16.9.42","type":"ip","description":"DMZ IP for CRM API.","attributes":{"subnet":"172.16.9.0/24","asset_zone":"dmz","last_seen":"2026-05-09","location":"region_A"}}
+{"entity_id":"ip_009","name":"10.20.8.14","type":"ip","description":"Production IP for inventory service node.","attributes":{"subnet":"10.20.8.0/24","asset_zone":"prod_network","last_seen":"2026-05-12","location":"region_A"}}
+{"entity_id":"ip_010","name":"10.20.8.15","type":"ip","description":"Production IP for reporting service node.","attributes":{"subnet":"10.20.8.0/24","asset_zone":"prod_network","last_seen":"2026-05-12","location":"region_A"}}
+{"entity_id":"ip_011","name":"10.12.3.22","type":"ip","description":"Office observed IP for identity portal tests.","attributes":{"subnet":"10.12.3.0/24","asset_zone":"office_network","last_seen":"2026-05-13","location":"building_A"}}
+{"entity_id":"ip_012","name":"10.30.5.33","type":"ip","description":"Database IP for analytics warehouse.","attributes":{"subnet":"10.30.5.0/24","asset_zone":"data_network","last_seen":"2026-05-12","location":"region_A"}}
+{"entity_id":"host_pay_01","name":"pay-prod-01","type":"host","description":"Payment production host.","attributes":{"os":"linux","location":"region_A"}}
+{"entity_id":"host_auth_01","name":"auth-prod-01","type":"host","description":"Authentication production host.","attributes":{"os":"linux","location":"region_A"}}
+{"entity_id":"host_order_01","name":"order-prod-01","type":"host","description":"Order production host.","attributes":{"os":"linux","location":"region_A"}}
+{"entity_id":"host_crm_01","name":"crm-dmz-01","type":"host","description":"CRM gateway host.","attributes":{"os":"linux","location":"region_A"}}
+{"entity_id":"host_inv_01","name":"inventory-prod-01","type":"host","description":"Inventory production host.","attributes":{"os":"linux","location":"region_A"}}
+{"entity_id":"host_report_01","name":"report-prod-01","type":"host","description":"Reporting production host.","attributes":{"os":"linux","location":"region_A"}}
+{"entity_id":"host_db_01","name":"db-customer-01","type":"host","description":"Customer database host.","attributes":{"os":"linux","location":"region_A"}}
+{"entity_id":"host_db_02","name":"db-order-01","type":"host","description":"Order database host.","attributes":{"os":"linux","location":"region_A"}}
+{"entity_id":"port_443","name":"443/tcp","type":"port","description":"HTTPS port.","attributes":{"protocol":"tcp"}}
+{"entity_id":"port_8443","name":"8443/tcp","type":"port","description":"Internal HTTPS port.","attributes":{"protocol":"tcp"}}
+{"entity_id":"port_5432","name":"5432/tcp","type":"port","description":"PostgreSQL port.","attributes":{"protocol":"tcp"}}
+{"entity_id":"port_3306","name":"3306/tcp","type":"port","description":"MySQL port.","attributes":{"protocol":"tcp"}}
+{"entity_id":"service_payment_api","name":"payment-api","type":"service","description":"Payment API service.","attributes":{"tier":"prod"}}
+{"entity_id":"service_login","name":"login-service","type":"service","description":"Authentication login service.","attributes":{"tier":"prod"}}
+{"entity_id":"service_order","name":"order-service","type":"service","description":"Order processing service.","attributes":{"tier":"prod"}}
+{"entity_id":"service_crm_gateway","name":"crm-gateway","type":"service","description":"CRM gateway service.","attributes":{"tier":"dmz"}}
+{"entity_id":"service_inventory","name":"inventory-service","type":"service","description":"Inventory management service.","attributes":{"tier":"prod"}}
+{"entity_id":"service_reporting","name":"reporting-service","type":"service","description":"Reporting service.","attributes":{"tier":"prod"}}
+{"entity_id":"service_customer_db","name":"customer-db-service","type":"service","description":"Database service for customer records.","attributes":{"tier":"data"}}
+{"entity_id":"service_order_db","name":"order-db-service","type":"service","description":"Database service for order records.","attributes":{"tier":"data"}}
+{"entity_id":"api_payment_charge","name":"POST /payment/charge","type":"api","description":"Charge API.","attributes":{"method":"POST"}}
+{"entity_id":"api_payment_refund","name":"POST /payment/refund","type":"api","description":"Refund API.","attributes":{"method":"POST"}}
+{"entity_id":"api_login_token","name":"POST /login/token","type":"api","description":"Token issue API.","attributes":{"method":"POST"}}
+{"entity_id":"api_order_query","name":"GET /orders/{id}","type":"api","description":"Order query API.","attributes":{"method":"GET"}}
+{"entity_id":"api_crm_customer","name":"GET /crm/customer","type":"api","description":"CRM customer API.","attributes":{"method":"GET"}}
+{"entity_id":"api_inventory_stock","name":"GET /inventory/stock","type":"api","description":"Inventory stock API.","attributes":{"method":"GET"}}
+{"entity_id":"db_customer","name":"customer_db","type":"database","description":"Customer database.","attributes":{"engine":"postgres"}}
+{"entity_id":"db_order","name":"order_db","type":"database","description":"Order database.","attributes":{"engine":"postgres"}}
+{"entity_id":"db_inventory","name":"inventory_db","type":"database","description":"Inventory database.","attributes":{"engine":"mysql"}}
+{"entity_id":"db_analytics","name":"analytics_warehouse","type":"database","description":"Analytics warehouse.","attributes":{"engine":"postgres"}}
+{"entity_id":"app_payment","name":"Payment Platform","type":"application","description":"Payment application.","attributes":{"criticality":"high"}}
+{"entity_id":"app_auth","name":"Identity Platform","type":"application","description":"Authentication application.","attributes":{"criticality":"high"}}
+{"entity_id":"app_order","name":"Order Platform","type":"application","description":"Order application.","attributes":{"criticality":"high"}}
+{"entity_id":"app_crm","name":"CRM Platform","type":"application","description":"Customer relationship application.","attributes":{"criticality":"medium"}}
+{"entity_id":"app_inventory","name":"Inventory Platform","type":"application","description":"Inventory application.","attributes":{"criticality":"medium"}}
+{"entity_id":"team_payment","name":"Payment Team","type":"team","description":"Team responsible for payment systems.","attributes":{"department":"dept_fintech"}}
+{"entity_id":"team_auth","name":"Auth Team","type":"team","description":"Team responsible for identity systems.","attributes":{"department":"dept_platform"}}
+{"entity_id":"team_order","name":"Order Team","type":"team","description":"Team responsible for order systems.","attributes":{"department":"dept_commerce"}}
+{"entity_id":"team_crm","name":"CRM Team","type":"team","description":"Team responsible for CRM systems.","attributes":{"department":"dept_commerce"}}
+{"entity_id":"team_inventory","name":"Inventory Team","type":"team","description":"Team responsible for inventory systems.","attributes":{"department":"dept_commerce"}}
+{"entity_id":"team_data","name":"Data Platform Team","type":"team","description":"Team responsible for shared data systems.","attributes":{"department":"dept_platform"}}
+{"entity_id":"dept_fintech","name":"FinTech Department","type":"department","description":"Payment and finance engineering department.","attributes":{}}
+{"entity_id":"dept_platform","name":"Platform Department","type":"department","description":"Platform engineering department.","attributes":{}}
+{"entity_id":"dept_commerce","name":"Commerce Department","type":"department","description":"Commerce engineering department.","attributes":{}}
+{"entity_id":"person_alice","name":"Alice Li","type":"person","description":"Payment service owner.","attributes":{"role":"owner"}}
+{"entity_id":"person_bob","name":"Bob Chen","type":"person","description":"Identity service owner.","attributes":{"role":"owner"}}
+{"entity_id":"person_cara","name":"Cara Wu","type":"person","description":"Order and CRM service owner.","attributes":{"role":"owner"}}
+{"entity_id":"ticket_001","name":"PAY-231 timeout","type":"ticket","description":"Payment timeout incident.","attributes":{"timestamp":"2026-05-12"}}
+{"entity_id":"ticket_002","name":"AUTH-104 token issue","type":"ticket","description":"Login token issue.","attributes":{"timestamp":"2026-05-11"}}
+{"entity_id":"ticket_003","name":"ORDER-552 query slow","type":"ticket","description":"Order query latency.","attributes":{"timestamp":"2026-05-10"}}
+{"entity_id":"ticket_004","name":"CRM-118 customer lookup","type":"ticket","description":"CRM lookup issue.","attributes":{"timestamp":"2026-05-09"}}
+{"entity_id":"ticket_005","name":"INV-88 stock sync","type":"ticket","description":"Inventory stock sync issue.","attributes":{"timestamp":"2026-05-13"}}
+{"entity_id":"doc_payment_runbook","name":"Payment Runbook","type":"document","description":"Runbook for payment platform.","attributes":{"timestamp":"2026-04-20"}}
+{"entity_id":"doc_auth_runbook","name":"Auth Runbook","type":"document","description":"Runbook for identity platform.","attributes":{"timestamp":"2026-04-21"}}
+{"entity_id":"doc_order_runbook","name":"Order Runbook","type":"document","description":"Runbook for order platform.","attributes":{"timestamp":"2026-04-22"}}
+{"entity_id":"doc_crm_inventory","name":"CRM and Inventory Runbook","type":"document","description":"Runbook for CRM and inventory platforms.","attributes":{"timestamp":"2026-04-23"}}
+{"entity_id":"alert_001","name":"Payment API latency","type":"alert","description":"Latency alert for payment API.","attributes":{"timestamp":"2026-05-12"}}
+{"entity_id":"alert_002","name":"Auth error rate","type":"alert","description":"Error rate alert for login service.","attributes":{"timestamp":"2026-05-11"}}
+{"entity_id":"alert_003","name":"Order DB connections","type":"alert","description":"Connection alert for order DB.","attributes":{"timestamp":"2026-05-10"}}
+{"entity_id":"alert_004","name":"CRM gateway 5xx","type":"alert","description":"Gateway 5xx alert.","attributes":{"timestamp":"2026-05-09"}}

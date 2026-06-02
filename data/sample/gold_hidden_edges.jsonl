@@ -1,0 +1,15 @@
+{"gold_id":"g_001","head":"ip_001","relation":"likely_owned_by","tail":"team_payment","evidence_ids":["ev_001","ev_023"]}
+{"gold_id":"g_002","head":"ip_002","relation":"likely_owned_by","tail":"team_payment","evidence_ids":["ev_004","ev_024"]}
+{"gold_id":"g_003","head":"service_payment_api","relation":"likely_owned_by","tail":"team_payment","evidence_ids":["ev_001","ev_002"]}
+{"gold_id":"g_004","head":"api_payment_charge","relation":"likely_owned_by","tail":"team_payment","evidence_ids":["ev_001","ev_031"]}
+{"gold_id":"g_005","head":"service_login","relation":"likely_owned_by","tail":"team_auth","evidence_ids":["ev_005","ev_006"]}
+{"gold_id":"g_006","head":"api_login_token","relation":"likely_owned_by","tail":"team_auth","evidence_ids":["ev_005","ev_006"]}
+{"gold_id":"g_007","head":"ip_004","relation":"likely_owned_by","tail":"team_order","evidence_ids":["ev_008","ev_026"]}
+{"gold_id":"g_008","head":"api_order_query","relation":"likely_owned_by","tail":"team_order","evidence_ids":["ev_008","ev_032"]}
+{"gold_id":"g_009","head":"db_order","relation":"likely_owned_by","tail":"team_order","evidence_ids":["ev_009","ev_042"]}
+{"gold_id":"g_010","head":"ip_008","relation":"likely_owned_by","tail":"team_crm","evidence_ids":["ev_011","ev_027"]}
+{"gold_id":"g_011","head":"api_crm_customer","relation":"likely_owned_by","tail":"team_crm","evidence_ids":["ev_011","ev_033"]}
+{"gold_id":"g_012","head":"ip_009","relation":"likely_owned_by","tail":"team_inventory","evidence_ids":["ev_014","ev_028"]}
+{"gold_id":"g_013","head":"api_inventory_stock","relation":"likely_owned_by","tail":"team_inventory","evidence_ids":["ev_014","ev_034"]}
+{"gold_id":"g_014","head":"db_customer","relation":"likely_owned_by","tail":"team_data","evidence_ids":["ev_016","ev_029"]}
+{"gold_id":"g_015","head":"db_analytics","relation":"likely_owned_by","tail":"team_data","evidence_ids":["ev_018","ev_039"]}
