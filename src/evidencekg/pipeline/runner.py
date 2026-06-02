@@ -8,7 +8,7 @@ from evidencekg.config.task_config import load_task_config
 from evidencekg.eval.evaluator import Evaluator
 from evidencekg.graph.graph_store import GraphStore
 from evidencekg.io import write_json, write_jsonl
-from evidencekg.llm.reasoner import MockReasoner
+from evidencekg.llm.reasoner import MockReasoner, RealLLMReasoner
 from evidencekg.prompting.prompt_builder import PromptBuilder
 from evidencekg.retrieval.evidence_retriever import EvidenceRetriever
 from evidencekg.verify.verifier import Verifier
@@ -30,13 +30,13 @@ class PipelineRunner:
         write_jsonl(output_root / "evidence_contexts.jsonl", contexts)
 
         prompt_builder = PromptBuilder()
-        reasoner = MockReasoner()
+        reasoner = self._build_reasoner(config)
         verifier = Verifier()
         context_by_id = {context["candidate_id"]: context for context in contexts}
         verified_predictions = []
         for candidate in candidates:
             built = prompt_builder.build(context_by_id[candidate["candidate_id"]])
-            prediction = reasoner.predict(built["structured_context"])
+            prediction = reasoner.predict(built["structured_context"], built["prompt_text"])
             verified = verifier.verify(candidate, built["structured_context"], prediction, config, graph)
             verified["prediction_id"] = f"p_{len(verified_predictions) + 1:03d}"
             verified_predictions.append(verified)
@@ -56,3 +56,10 @@ class PipelineRunner:
         )
         write_json(output_root / "evaluation_report.json", report)
         return report
+
+    def _build_reasoner(self, config: Any) -> Any:
+        if config.llm.mode == "mock":
+            return MockReasoner()
+        if config.llm.mode == "real":
+            return RealLLMReasoner(config.llm)
+        raise ValueError(f"unsupported llm.mode: {config.llm.mode}")

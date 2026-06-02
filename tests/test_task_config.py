@@ -8,5 +8,5 @@ def test_task_config_loads_target_relation_and_mock_mode():
     assert "type_rule" not in config.candidate_rules
     assert config.llm.mode == "mock"
     assert config.llm.best_of_n == 1
+    assert config.llm.timeout_seconds == 30.0
     assert config.is_allowed_pair("ip", "team")
-

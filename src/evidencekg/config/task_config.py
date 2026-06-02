@@ -21,8 +21,13 @@ class EvidenceRetrievalConfig:
 class LLMConfig:
     mode: str = "mock"
     provider: str = "mock"
+    model: str = "gpt-4o-mini"
+    base_url: str = "https://api.openai.com/v1"
+    api_key_env: str = "OPENAI_API_KEY"
     temperature: float = 0.2
     best_of_n: int = 1
+    timeout_seconds: float = 30.0
+    max_retries: int = 2
 
 
 @dataclass(frozen=True)

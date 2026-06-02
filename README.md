@@ -34,6 +34,51 @@ python -m pip install -r requirements.txt
 python scripts/run_pipeline.py --config configs/task_owned_by.yaml --data-dir data/sample --output-dir outputs
 ```
 
+This uses:
+
+```yaml
+llm:
+  mode: mock
+```
+
+Mock mode is fully local and does not require an API key.
+
+## Run Real LLM Pipeline
+
+Copy `.env.example` to `.env` and set your OpenAI-compatible API key:
+
+```powershell
+Copy-Item .env.example .env
+notepad .env
+```
+
+Then run:
+
+```powershell
+python scripts/run_pipeline.py --config configs/task_owned_by_real.yaml --data-dir data/sample --output-dir outputs_real
+```
+
+Real mode uses:
+
+```yaml
+llm:
+  mode: real
+  provider: openai_compatible
+```
+
+The real LLM receives `PromptBuilder.prompt_text` and must return JSON with:
+
+```json
+{
+  "decision": "accept | reject | uncertain",
+  "confidence": 0.0,
+  "reason": "short explanation",
+  "supporting_evidence_ids": []
+}
+```
+
+If the provider is unavailable, times out, or returns invalid JSON after retries, the reasoner degrades the prediction to `uncertain` with `confidence=0.0`. Real LLM outputs still pass through the same Verifier before final edges are written.
+
 Run candidate generation only:
 
 ```powershell

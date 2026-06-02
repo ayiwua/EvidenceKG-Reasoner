@@ -6,4 +6,5 @@ pytest-cache-files-*/
 outputs/*.jsonl
 outputs/*.json
 !outputs/.gitkeep
+outputs_real/
 .env

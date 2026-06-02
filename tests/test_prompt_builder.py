@@ -17,4 +17,4 @@ def test_prompt_builder_returns_structured_context_and_prompt_text():
 
     assert built["structured_context"]["candidate_id"] == "c_001"
     assert "Candidate:" in built["prompt_text"]
-
+    assert "Context JSON:" in built["prompt_text"]

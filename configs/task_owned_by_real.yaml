@@ -1,0 +1,52 @@
+task_name: owned_by_discovery_real
+target_relation: likely_owned_by
+
+allowed_head_types:
+  - ip
+  - host
+  - service
+  - api
+  - database
+  - application
+
+allowed_tail_types:
+  - team
+  - department
+  - person
+
+candidate_rules:
+  - two_hop_path
+  - common_neighbor
+  - evidence_overlap
+
+schema_filter:
+  enabled: true
+
+evidence_retrieval:
+  max_hops: 3
+  max_paths: 5
+  max_evidence_snippets: 8
+  include_entity_profiles: true
+  include_common_neighbors: true
+  include_related_triples: true
+
+llm:
+  mode: real
+  provider: openai_compatible
+  model: gpt-4o-mini
+  base_url: https://api.openai.com/v1
+  api_key_env: OPENAI_API_KEY
+  temperature: 0.2
+  best_of_n: 1
+  timeout_seconds: 30
+  max_retries: 2
+
+verifier:
+  confidence_threshold: 0.7
+  require_supporting_evidence: true
+  check_schema_consistency: true
+  check_evidence_grounding: true
+  check_conflict: true
+
+evaluation:
+  gold_file: gold_hidden_edges.jsonl
