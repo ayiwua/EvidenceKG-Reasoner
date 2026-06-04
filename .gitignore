@@ -7,4 +7,7 @@ outputs/*.jsonl
 outputs/*.json
 !outputs/.gitkeep
 outputs_real/
+outputs_*/
+outputs_stage3/
 .env
+test.py

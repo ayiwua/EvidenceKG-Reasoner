@@ -13,6 +13,7 @@ class EvidenceRetrievalConfig:
     max_paths: int = 5
     max_evidence_snippets: int = 8
     include_entity_profiles: bool = True
+    include_graph_paths: bool = True
     include_common_neighbors: bool = True
     include_related_triples: bool = True
 
@@ -23,11 +24,14 @@ class LLMConfig:
     provider: str = "mock"
     model: str = "gpt-4o-mini"
     base_url: str = "https://api.openai.com/v1"
-    api_key_env: str = "OPENAI_API_KEY"
+    api_key_env: str = "LLM_API_KEY"
+    base_url_env: str = "LLM_BASE_URL"
+    model_env: str = "LLM_MODEL"
     temperature: float = 0.2
     best_of_n: int = 1
     timeout_seconds: float = 30.0
     max_retries: int = 2
+    trust_env: bool = False
 
 
 @dataclass(frozen=True)

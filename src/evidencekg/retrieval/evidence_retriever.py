@@ -31,10 +31,14 @@ class EvidenceRetriever:
                 "candidate_score": candidate.get("candidate_score", 0.0),
                 "rule_scores": candidate.get("rule_scores", {}),
             },
-            "head_profile": graph.get_entity(head) or {},
-            "tail_profile": graph.get_entity(tail) or {},
-            "graph_paths": candidate.get("paths", [])[: config.evidence_retrieval.max_paths],
-            "common_neighbors": candidate.get("common_neighbors", []),
+            "head_profile": (graph.get_entity(head) or {}) if config.evidence_retrieval.include_entity_profiles else {},
+            "tail_profile": (graph.get_entity(tail) or {}) if config.evidence_retrieval.include_entity_profiles else {},
+            "graph_paths": candidate.get("paths", [])[: config.evidence_retrieval.max_paths]
+            if config.evidence_retrieval.include_graph_paths
+            else [],
+            "common_neighbors": candidate.get("common_neighbors", [])
+            if config.evidence_retrieval.include_common_neighbors
+            else [],
             "related_triples": related_triples if config.evidence_retrieval.include_related_triples else [],
             "evidence_snippets": list(deduped_evidence.values())[: config.evidence_retrieval.max_evidence_snippets],
         }

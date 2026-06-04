@@ -1,4 +1,4 @@
-task_name: owned_by_discovery_real
+task_name: owned_by_discovery_evidence_only
 target_relation: likely_owned_by
 
 allowed_head_types:
@@ -15,8 +15,6 @@ allowed_tail_types:
   - person
 
 candidate_rules:
-  - two_hop_path
-  - common_neighbor
   - evidence_overlap
 
 schema_filter:
@@ -27,22 +25,15 @@ evidence_retrieval:
   max_paths: 5
   max_evidence_snippets: 8
   include_entity_profiles: true
+  include_graph_paths: true
   include_common_neighbors: true
   include_related_triples: true
 
 llm:
-  mode: real
-  provider: openai_compatible
-  model: gpt-4o-mini
-  base_url: https://api.openai.com/v1
-  api_key_env: LLM_API_KEY
-  base_url_env: LLM_BASE_URL
-  model_env: LLM_MODEL
+  mode: mock
+  provider: mock
   temperature: 0.2
   best_of_n: 1
-  timeout_seconds: 15
-  max_retries: 1
-  trust_env: false
 
 verifier:
   confidence_threshold: 0.7

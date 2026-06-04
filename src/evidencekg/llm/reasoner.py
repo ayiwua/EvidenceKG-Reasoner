@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import json
 import re
+import sys
+import time
 from typing import Any, Protocol
 
 from evidencekg.config.task_config import LLMConfig
@@ -51,24 +53,77 @@ class MockReasoner:
 class RealLLMReasoner:
     """OpenAI-compatible reasoner using prompt text, with JSON parsing and fallback."""
 
-    def __init__(self, config: LLMConfig, client: OpenAICompatibleClient | None = None) -> None:
+    def __init__(
+        self,
+        config: LLMConfig,
+        client: OpenAICompatibleClient | None = None,
+        debug_timing: bool = False,
+    ) -> None:
         self.config = config
         self.client = client or OpenAICompatibleClient(config)
+        self.debug_timing = debug_timing
+        self.last_metadata: dict[str, Any] = {}
 
     def predict(self, context: dict[str, Any], prompt_text: str | None = None) -> dict[str, Any]:
+        start = time.perf_counter()
+        candidate_id = context.get("candidate_id")
+        self.last_metadata = {
+            "elapsed_seconds": 0.0,
+            "attempts": 0,
+            "degraded": False,
+            "warning": "",
+            "parse_elapsed_seconds": 0.0,
+            "client_attempts": [],
+            "error_type": "",
+        }
         if not prompt_text:
-            return self._fallback("real LLM mode requires prompt_text")
+            return self._fallback("real LLM mode requires prompt_text", start, attempts=0)
 
         last_error = ""
+        last_error_type = ""
+        client_attempts: list[dict[str, Any]] = []
         attempts = max(1, self.config.max_retries + 1)
-        for _ in range(attempts):
+        for attempt_index in range(1, attempts + 1):
             try:
-                content = self.client.complete(prompt_text)
+                content = self.client.complete(
+                    prompt_text,
+                    attempt_index=attempt_index,
+                    total_attempts=attempts,
+                    candidate_id=str(candidate_id) if candidate_id else None,
+                    debug_timing=self.debug_timing,
+                )
+                client_attempts.append(dict(getattr(self.client, "last_metadata", {})))
+                parse_start = time.perf_counter()
                 parsed = self._parse_json_output(content)
-                return self._normalize(parsed)
+                parse_elapsed = round(time.perf_counter() - parse_start, 3)
+                result = self._normalize(parsed)
+                self.last_metadata = {
+                    "elapsed_seconds": round(time.perf_counter() - start, 3),
+                    "attempts": attempt_index,
+                    "degraded": False,
+                    "warning": "",
+                    "parse_elapsed_seconds": parse_elapsed,
+                    "client_attempts": client_attempts,
+                    "error_type": "",
+                }
+                return result
             except Exception as exc:  # noqa: BLE001 - degrade external provider failures.
                 last_error = str(exc)
-        return self._fallback(f"real LLM unavailable or returned invalid JSON: {last_error}")
+                client_attempts.append(dict(getattr(self.client, "last_metadata", {})))
+                last_error_type = self._classify_reasoner_error(last_error)
+                print(
+                    f"[llm-reasoner][warning] attempt={attempt_index}/{attempts} "
+                    f"error_type={last_error_type} failed: {last_error}",
+                    file=sys.stderr,
+                    flush=True,
+                )
+        return self._fallback(
+            f"real LLM unavailable or returned invalid JSON: {last_error}",
+            start,
+            attempts=attempts,
+            client_attempts=client_attempts,
+            error_type=last_error_type,
+        )
 
     def _parse_json_output(self, content: str) -> dict[str, Any]:
         try:
@@ -97,10 +152,42 @@ class RealLLMReasoner:
             "supporting_evidence_ids": [str(item) for item in evidence_ids],
         }
 
-    def _fallback(self, reason: str) -> dict[str, Any]:
+    def _fallback(
+        self,
+        reason: str,
+        start: float | None = None,
+        attempts: int = 0,
+        client_attempts: list[dict[str, Any]] | None = None,
+        error_type: str = "",
+    ) -> dict[str, Any]:
+        elapsed = time.perf_counter() - start if start is not None else 0.0
+        self.last_metadata = {
+            "elapsed_seconds": round(elapsed, 3),
+            "attempts": attempts,
+            "degraded": True,
+            "warning": reason,
+            "parse_elapsed_seconds": 0.0,
+            "client_attempts": client_attempts or [],
+            "error_type": error_type or self._classify_reasoner_error(reason),
+        }
+        print(
+            f"[llm-reasoner][warning] degraded_to_uncertain elapsed={elapsed:.2f}s reason={reason}",
+            file=sys.stderr,
+            flush=True,
+        )
         return {
             "decision": "uncertain",
             "confidence": 0.0,
             "reason": reason,
             "supporting_evidence_ids": [],
         }
+
+    def _classify_reasoner_error(self, text: str) -> str:
+        lowered = text.lower()
+        if "timed out" in lowered or "timeout" in lowered:
+            return "timeout"
+        if "no json object" in lowered or "jsondecodeerror" in lowered or "invalid json" in lowered:
+            return "parse_failure"
+        if "llm request failed" in lowered or "missing api key" in lowered:
+            return "provider_error"
+        return "reasoner_error" if text else ""
