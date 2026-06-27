@@ -16,6 +16,7 @@ from evidencekg.llm.reasoner import MockReasoner, RealLLMReasoner
 from evidencekg.prompting.prompt_builder import PromptBuilder
 from evidencekg.retrieval.evidence_retriever import EvidenceRetriever
 from evidencekg.verify.verifier import Verifier
+from evidencekg.writeback import KGWritebackManager
 from tqdm import tqdm
 
 
@@ -32,6 +33,8 @@ class PipelineRunner:
         debug_timing: bool = False,
         llm_timeout_seconds: float | None = None,
         llm_max_retries: int | None = None,
+        enable_writeback: bool = False,
+        writeback_mode: str = "pending",
     ) -> dict[str, Any]:
         timing_events: list[dict[str, Any]] = []
         output_root = Path(output_dir)
@@ -87,6 +90,8 @@ class PipelineRunner:
             max_candidates=max_candidates,
             candidate_offset=candidate_offset,
             disable_verifier=disable_verifier,
+            enable_writeback=enable_writeback,
+            writeback_mode=writeback_mode,
             reasoning_candidate_ids=[item["candidate_id"] for item in reasoning_candidates],
         )
         resume_run = self._can_resume(output_root, run_metadata)
@@ -264,6 +269,22 @@ class PipelineRunner:
         report["candidate_offset"] = candidate_offset
         if disable_verifier:
             report.update(self._raw_prediction_risk_stats(verified_predictions, config, graph))
+        if enable_writeback:
+            writeback_start = time.perf_counter()
+            writeback_report = KGWritebackManager().writeback(
+                verified_predictions,
+                graph,
+                output_root,
+                mode=writeback_mode,
+            )
+            report["writeback"] = writeback_report
+            self._record_stage(
+                timing_events,
+                "writeback",
+                writeback_start,
+                debug_timing,
+                {"mode": writeback_mode, "written_count": writeback_report["written_count"]},
+            )
         self._record_write_outputs(timing_events, write_elapsed_total, debug_timing)
         write_json(output_root / "evaluation_report.json", report)
         if debug_timing:
@@ -354,6 +375,8 @@ class PipelineRunner:
         max_candidates: int | None,
         candidate_offset: int,
         disable_verifier: bool,
+        enable_writeback: bool,
+        writeback_mode: str,
         reasoning_candidate_ids: list[str],
     ) -> dict[str, Any]:
         return {
@@ -367,6 +390,8 @@ class PipelineRunner:
             "candidate_offset": candidate_offset,
             "max_candidates": max_candidates,
             "disable_verifier": disable_verifier,
+            "enable_writeback": enable_writeback,
+            "writeback_mode": writeback_mode,
             "reasoning_candidate_ids": reasoning_candidate_ids,
         }
 
@@ -385,6 +410,10 @@ class PipelineRunner:
         output_root.mkdir(parents=True, exist_ok=True)
         for name in ["verified_predictions.jsonl", "predicted_edges.jsonl"]:
             (output_root / name).write_text("", encoding="utf-8")
+        for name in ["pending_edges.jsonl", "triples.enriched.jsonl", "writeback_report.json"]:
+            path = output_root / name
+            if path.exists():
+                path.unlink()
         if debug_timing:
             (output_root / "timing_report.jsonl").write_text("", encoding="utf-8")
 

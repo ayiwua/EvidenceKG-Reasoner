@@ -12,6 +12,10 @@ class EvidenceRetrievalConfig:
     max_hops: int = 3
     max_paths: int = 5
     max_evidence_snippets: int = 8
+    top_k_before_rerank: int = 30
+    top_k_after_rerank: int = 8
+    bi_encoder_model: str = "sentence-transformers/all-MiniLM-L6-v2"
+    cross_encoder_model: str = "cross-encoder/ms-marco-MiniLM-L-6-v2"
     include_entity_profiles: bool = True
     include_graph_paths: bool = True
     include_common_neighbors: bool = True
@@ -67,6 +71,11 @@ class TaskConfig:
 
 def load_task_config(path: str | Path) -> TaskConfig:
     raw = yaml.safe_load(Path(path).read_text(encoding="utf-8"))
+    evidence_retrieval_raw = dict(raw.get("evidence_retrieval", {}))
+    evidence_fields = EvidenceRetrievalConfig.__dataclass_fields__
+    evidence_retrieval_raw = {
+        key: value for key, value in evidence_retrieval_raw.items() if key in evidence_fields
+    }
     return TaskConfig(
         task_name=raw["task_name"],
         target_relation=raw["target_relation"],
@@ -74,7 +83,7 @@ def load_task_config(path: str | Path) -> TaskConfig:
         allowed_tail_types=list(raw["allowed_tail_types"]),
         candidate_rules=list(raw.get("candidate_rules", [])),
         schema_filter=dict(raw.get("schema_filter", {"enabled": True})),
-        evidence_retrieval=EvidenceRetrievalConfig(**raw.get("evidence_retrieval", {})),
+        evidence_retrieval=EvidenceRetrievalConfig(**evidence_retrieval_raw),
         llm=LLMConfig(**raw.get("llm", {})),
         verifier=VerifierConfig(**raw.get("verifier", {})),
         evaluation=EvaluationConfig(**raw.get("evaluation", {})),

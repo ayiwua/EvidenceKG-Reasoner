@@ -51,6 +51,17 @@ def main() -> None:
         default=None,
         help="Override llm.max_retries. Use 0 to send exactly one provider request.",
     )
+    parser.add_argument(
+        "--enable-writeback",
+        action="store_true",
+        help="Write verified accepted edges to pending_edges.jsonl or triples.enriched.jsonl.",
+    )
+    parser.add_argument(
+        "--writeback-mode",
+        default="pending",
+        choices=["pending", "approved"],
+        help="pending writes pending_edges.jsonl; approved writes triples.enriched.jsonl.",
+    )
     args = parser.parse_args()
 
     result = PipelineRunner().run(
@@ -64,6 +75,8 @@ def main() -> None:
         debug_timing=args.debug_timing,
         llm_timeout_seconds=args.llm_timeout_seconds,
         llm_max_retries=args.llm_max_retries,
+        enable_writeback=args.enable_writeback,
+        writeback_mode=args.writeback_mode,
     )
     print(json.dumps(result, ensure_ascii=False, indent=2, sort_keys=True))
 

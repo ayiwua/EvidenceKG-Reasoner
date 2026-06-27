@@ -26,7 +26,12 @@ evidence_retrieval:
   max_hops: 3
   max_paths: 5
   max_evidence_snippets: 8
+  top_k_before_rerank: 30
+  top_k_after_rerank: 8
+  bi_encoder_model: sentence-transformers/all-MiniLM-L6-v2
+  cross_encoder_model: cross-encoder/ms-marco-MiniLM-L-6-v2
   include_entity_profiles: true
+  include_graph_paths: true
   include_common_neighbors: true
   include_related_triples: true
 

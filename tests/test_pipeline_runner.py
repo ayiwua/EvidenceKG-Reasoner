@@ -103,3 +103,22 @@ def test_pipeline_runner_debug_timing_writes_timing_report(tmp_path):
     assert any(item.get("stage") == "write outputs" for item in timing)
     assert any(item.get("stage") == "evaluation" for item in timing)
     assert sum(1 for item in timing if item.get("event") == "candidate") == 2
+
+
+def test_pipeline_runner_writeback_writes_pending_report(tmp_path):
+    report = PipelineRunner().run(
+        "configs/task_owned_by.yaml",
+        "data/sample",
+        str(tmp_path),
+        max_candidates=5,
+        enable_writeback=True,
+        writeback_mode="pending",
+    )
+
+    pending_path = tmp_path / "pending_edges.jsonl"
+    writeback_report_path = tmp_path / "writeback_report.json"
+
+    assert pending_path.exists()
+    assert writeback_report_path.exists()
+    assert "writeback" in report
+    assert report["writeback"]["written_count"] == len(read_jsonl(pending_path))

@@ -9,4 +9,8 @@ def test_task_config_loads_target_relation_and_mock_mode():
     assert config.llm.mode == "mock"
     assert config.llm.best_of_n == 1
     assert config.llm.timeout_seconds == 30.0
+    assert config.evidence_retrieval.top_k_before_rerank == 30
+    assert config.evidence_retrieval.top_k_after_rerank == 8
+    assert config.evidence_retrieval.bi_encoder_model == "sentence-transformers/all-MiniLM-L6-v2"
+    assert config.evidence_retrieval.cross_encoder_model == "cross-encoder/ms-marco-MiniLM-L-6-v2"
     assert config.is_allowed_pair("ip", "team")

@@ -9,7 +9,7 @@ The first stage implements a fully local Mock Pipeline. It does not call a real 
 ```text
 JSONL KG loading
   -> schema filter and candidate generation
-  -> graph evidence retrieval
+  -> graph / BM25 / optional embedding evidence retrieval
   -> structured context and prompt preparation
   -> MockReasoner
   -> Verifier
@@ -19,6 +19,39 @@ JSONL KG loading
 ```
 
 The target relation is read from `configs/task_owned_by.yaml`. The default first-stage task uses `likely_owned_by`, but the pipeline code is configuration-driven and does not hard-code that relation.
+
+## Evidence Retrieval
+
+`EvidenceRetriever` now uses a fixed two-stage Evidence RAG flow:
+
+```text
+candidate relation
+  -> graph-aware candidate query construction
+  -> bi-encoder dense retrieval over evidence corpus
+  -> cross-encoder evidence reranking
+  -> evidence-grounded LLM reasoning
+  -> verifier grounding check
+```
+
+The graph still matters: candidate generation, graph paths, common neighbors, entity profiles, and related triples remain part of the pipeline. They are used to construct a richer retrieval query and to populate the prompt context, but evidence selection is no longer BM25 or related-entity overlap.
+
+The default retrieval config is:
+
+```yaml
+evidence_retrieval:
+  top_k_before_rerank: 30
+  top_k_after_rerank: 8
+  bi_encoder_model: sentence-transformers/all-MiniLM-L6-v2
+  cross_encoder_model: cross-encoder/ms-marco-MiniLM-L-6-v2
+```
+
+Each evidence document is encoded from its text, source, related entities, timestamp, reliability, and related entity names/types/descriptions. For each candidate, the retriever builds a query from the target relation, head/tail profiles, common neighbors, graph path summaries, and related triples.
+
+At runtime, the bi-encoder recalls `top_k_before_rerank` evidence snippets with cosine similarity. The cross-encoder then scores `(candidate_query, evidence_text)` pairs and the retriever returns `top_k_after_rerank` snippets. Returned snippets keep their original evidence fields and add `embedding_score`, `rerank_score`, `retrieval_query`, and `retrieval_rank`.
+
+This is still local in-memory retrieval, not an external vector database system: there is no Chroma, Milvus, or FAISS service. There is also no BM25 mode and no retrieval-mode switch. If `sentence-transformers` or the configured models are unavailable, the error is exposed so the environment can be fixed.
+
+The LLM still cannot cite arbitrary evidence. `supporting_evidence_ids` must come from the current context's `evidence_snippets`, and the Verifier keeps checking that grounding before an accepted relation is written.
 
 ## Setup
 
@@ -155,6 +188,14 @@ Run candidate generation only:
 python scripts/run_pipeline.py --config configs/task_owned_by.yaml --data-dir data/sample --output-dir outputs --stage candidates
 ```
 
+Run with KG writeback staging enabled:
+
+```powershell
+python scripts/run_pipeline.py --config configs/task_owned_by.yaml --data-dir data/sample --output-dir outputs --enable-writeback --writeback-mode pending
+```
+
+`pending` mode writes verified accepted edges to `pending_edges.jsonl` for review. `approved` mode writes `triples.enriched.jsonl`, which contains the original triples plus approved prediction edges. The source `data/sample/triples.jsonl` is never overwritten.
+
 Run evaluation only:
 
 ```powershell
@@ -192,6 +233,9 @@ The pipeline writes outputs to `outputs/`.
 - `verified_predictions.jsonl`: all candidate predictions after verifier review, including `accept`, `reject`, and `uncertain`.
 - `predicted_edges.jsonl`: only final accepted edges where `decision=accept` and `verifier_status=passed`.
 - `evaluation_report.json`: hidden edge recovery metrics.
+- `pending_edges.jsonl`: optional writeback staging file when `--enable-writeback --writeback-mode pending` is used.
+- `triples.enriched.jsonl`: optional enriched KG file when `--enable-writeback --writeback-mode approved` is used.
+- `writeback_report.json`: optional writeback counts for `pending`, `skipped_duplicate`, `skipped_conflict`, `approved`, and `written_count`.
 
 ## Stage 1 Mock Pipeline Result
 
