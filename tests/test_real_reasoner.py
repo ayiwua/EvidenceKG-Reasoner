@@ -1,4 +1,5 @@
 from evidencekg.config.task_config import LLMConfig, load_task_config
+from evidencekg.llm.base_client import LLMResponse
 from evidencekg.llm.reasoner import RealLLMReasoner
 
 
@@ -12,16 +13,9 @@ class FakeClient:
             "error_type": "",
         }
 
-    def complete(
-        self,
-        prompt_text: str,
-        attempt_index: int = 1,
-        total_attempts: int = 1,
-        candidate_id: str | None = None,
-        debug_timing: bool = False,
-    ) -> str:
-        assert "Candidate:" in prompt_text
-        return self.content
+    def chat(self, request, **kwargs):
+        assert "Candidate:" in request.user_prompt
+        return LLMResponse("fake", "fake-model", self.content, 0)
 
 
 class FailingClient:
@@ -32,14 +26,7 @@ class FailingClient:
         "error_type": "provider_error",
     }
 
-    def complete(
-        self,
-        prompt_text: str,
-        attempt_index: int = 1,
-        total_attempts: int = 1,
-        candidate_id: str | None = None,
-        debug_timing: bool = False,
-    ) -> str:
+    def chat(self, request, **kwargs):
         raise RuntimeError("network unavailable")
 
 

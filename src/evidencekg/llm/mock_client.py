@@ -5,7 +5,7 @@ import os
 import time
 from typing import Any
 
-from evidencekg.llm.base_client import LLMResponse
+from evidencekg.llm.base_client import LLMRequest, LLMResponse
 
 
 class MockLLMClient:
@@ -16,7 +16,7 @@ class MockLLMClient:
         model_env = str(config.get("model_env", ""))
         self.model = os.environ.get(model_env, str(config.get("model", "mock-evidencekg-v2"))) if model_env else str(config.get("model", "mock-evidencekg-v2"))
 
-    def chat(self, messages: list[dict[str, str]], **kwargs: Any) -> LLMResponse:
+    def chat(self, request: LLMRequest, **kwargs: Any) -> LLMResponse:
         start = time.perf_counter()
         context = kwargs.get("context") or {}
         support = context.get("supporting_evidence_candidates", [])
@@ -47,6 +47,6 @@ class MockLLMClient:
             model=self.model,
             content=content,
             latency_ms=latency_ms,
-            usage={"input_tokens": sum(len(item.get("content", "")) for item in messages), "output_tokens": len(content)},
+            usage={"input_tokens": len(request.system_prompt) + len(request.user_prompt), "output_tokens": len(content)},
             raw={"mock": True},
         )

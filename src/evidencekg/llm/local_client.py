@@ -6,7 +6,7 @@ from typing import Any
 
 import httpx
 
-from evidencekg.llm.base_client import LLMResponse
+from evidencekg.llm.base_client import LLMRequest, LLMResponse
 
 
 class LocalClient:
@@ -19,10 +19,20 @@ class LocalClient:
         self.base_url = os.environ.get(base_url_env, str(config.get("base_url", "http://localhost:8000/chat")))
         self.timeout = float(config.get("timeout", 30))
 
-    def chat(self, messages: list[dict[str, str]], **kwargs: Any) -> LLMResponse:
+    def chat(self, request: LLMRequest, **kwargs: Any) -> LLMResponse:
         start = time.perf_counter()
+        payload = {
+            "model": self.model,
+            "system_prompt": request.system_prompt,
+            "user_prompt": request.user_prompt,
+            "messages": [
+                {"role": "system", "content": request.system_prompt},
+                {"role": "user", "content": request.user_prompt},
+            ],
+            **kwargs,
+        }
         with httpx.Client(timeout=self.timeout) as client:
-            response = client.post(self.base_url, json={"model": self.model, "messages": messages, **kwargs})
+            response = client.post(self.base_url, json=payload)
             response.raise_for_status()
             raw = response.json()
         content = str(raw.get("content") or raw.get("message") or "")

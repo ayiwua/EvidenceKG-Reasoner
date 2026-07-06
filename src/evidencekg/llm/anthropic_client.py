@@ -4,7 +4,7 @@ import os
 import time
 from typing import Any
 
-from evidencekg.llm.base_client import LLMResponse
+from evidencekg.llm.base_client import LLMRequest, LLMResponse
 
 
 class AnthropicClient:
@@ -17,7 +17,7 @@ class AnthropicClient:
         self.max_tokens = int(config.get("max_tokens", 800))
         self.temperature = float(config.get("temperature", 0.0))
 
-    def chat(self, messages: list[dict[str, str]], **kwargs: Any) -> LLMResponse:
+    def chat(self, request: LLMRequest, **kwargs: Any) -> LLMResponse:
         api_key = os.environ.get(self.api_key_env)
         if not api_key:
             raise RuntimeError(f"missing API key env var for anthropic provider: {self.api_key_env}")
@@ -32,7 +32,8 @@ class AnthropicClient:
             model=self.model,
             max_tokens=self.max_tokens,
             temperature=self.temperature,
-            messages=messages,
+            system=request.system_prompt,
+            messages=[{"role": "user", "content": request.user_prompt}],
         )
         content = "".join(getattr(block, "text", "") for block in response.content)
         return LLMResponse(

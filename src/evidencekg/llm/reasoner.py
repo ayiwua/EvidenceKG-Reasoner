@@ -7,7 +7,7 @@ import time
 from typing import Any, Protocol
 
 from evidencekg.config.task_config import LLMConfig
-from evidencekg.llm.base_client import BaseLLMClient
+from evidencekg.llm.base_client import BaseLLMClient, LLMRequest
 from evidencekg.llm.openai_compatible_client import OpenAICompatibleClient
 
 
@@ -86,16 +86,19 @@ class RealLLMReasoner:
         attempts = max(1, self.config.max_retries + 1)
         for attempt_index in range(1, attempts + 1):
             try:
-                content = self.client.complete(
-                    prompt_text,
-                    attempt_index=attempt_index,
-                    total_attempts=attempts,
-                    candidate_id=str(candidate_id) if candidate_id else None,
-                    debug_timing=self.debug_timing,
+                response = self.client.chat(
+                    LLMRequest(
+                        system_prompt="You return only valid JSON for evidence-grounded KG relation judgments.",
+                        user_prompt=prompt_text,
+                        metadata={
+                            "candidate_id": str(candidate_id) if candidate_id else "",
+                            "attempt_index": attempt_index,
+                            "total_attempts": attempts,
+                        },
+                    )
                 )
-                client_attempts.append(dict(getattr(self.client, "last_metadata", {})))
                 parse_start = time.perf_counter()
-                parsed = self._parse_json_output(content)
+                parsed = self._parse_json_output(response.content)
                 parse_elapsed = round(time.perf_counter() - parse_start, 3)
                 result = self._normalize(parsed)
                 self.last_metadata = {
@@ -201,9 +204,9 @@ class LLMReasoner:
         self.client = client
 
     def predict(self, context: dict[str, Any]) -> dict[str, Any]:
-        messages = self._messages(context)
+        request = self._request(context)
         try:
-            response = self.client.chat(messages, context=context)
+            response = self.client.chat(request, context=context)
             parsed = self._parse_json_output(response.content)
             result = self._normalize(parsed, context)
             result["provider_metadata"] = {
@@ -219,52 +222,45 @@ class LLMReasoner:
         except Exception as exc:  # noqa: BLE001 - explicit uncertain result for provider/parse failure.
             return self._uncertain(context, error_type=self._classify_reasoner_error(str(exc)), reason=str(exc))
 
-    def _messages(self, context: dict[str, Any]) -> list[dict[str, str]]:
+    def _request(self, context: dict[str, Any]) -> LLMRequest:
         supporting_ids = [item["id"] for item in context.get("supporting_evidence_candidates", [])]
         conflict_ids = [item["id"] for item in context.get("conflict_evidence_candidates", [])]
-        return [
+        system_prompt = (
+            "You are a strict JSON-only relation verification engine. "
+            "Return exactly one JSON object and no markdown. "
+            "Required fields: decision, confidence, relation, reason, "
+            "supporting_evidence_ids, conflict_evidence_ids, evidence_analysis. "
+            "decision must be accept, reject, or uncertain. confidence must be a number from 0 to 1. "
+            "supporting_evidence_ids and conflict_evidence_ids must be arrays of strings selected only "
+            "from the provided allowed evidence ids. If accepting, include at least one supporting evidence id."
+        )
+        user_prompt = json.dumps(
             {
-                "role": "system",
-                "content": (
-                    "You are a strict JSON-only relation verification engine. "
-                    "Return exactly one JSON object and no markdown. "
-                    "Required fields: decision, confidence, relation, reason, "
-                    "supporting_evidence_ids, conflict_evidence_ids, evidence_analysis. "
-                    "decision must be accept, reject, or uncertain. confidence must be a number from 0 to 1. "
-                    "supporting_evidence_ids and conflict_evidence_ids must be arrays of strings selected only "
-                    "from the provided allowed evidence ids. If accepting, include at least one supporting evidence id."
-                ),
+                "required_output_schema": {
+                    "decision": "accept | reject | uncertain",
+                    "confidence": 0.0,
+                    "relation": context.get("candidate", {}).get("relation", ""),
+                    "reason": "short evidence-grounded explanation",
+                    "supporting_evidence_ids": [],
+                    "conflict_evidence_ids": [],
+                    "evidence_analysis": [
+                        {
+                            "evidence_id": "one allowed evidence id",
+                            "support_label": "strong_support | weak_support | irrelevant | conflict",
+                            "explanation": "why this evidence does or does not support the relation",
+                        }
+                    ],
+                },
+                "allowed_supporting_evidence_ids": supporting_ids,
+                "allowed_conflict_evidence_ids": conflict_ids,
+                "candidate": context.get("candidate", {}),
+                "packed_context": context.get("packed_context", {}),
+                "supporting_evidence_candidates": context.get("supporting_evidence_candidates", []),
+                "conflict_evidence_candidates": context.get("conflict_evidence_candidates", []),
             },
-            {
-                "role": "user",
-                "content": json.dumps(
-                    {
-                        "required_output_schema": {
-                            "decision": "accept | reject | uncertain",
-                            "confidence": 0.0,
-                            "relation": context.get("candidate", {}).get("relation", ""),
-                            "reason": "short evidence-grounded explanation",
-                            "supporting_evidence_ids": [],
-                            "conflict_evidence_ids": [],
-                            "evidence_analysis": [
-                                {
-                                    "evidence_id": "one allowed evidence id",
-                                    "support_label": "strong_support | weak_support | irrelevant | conflict",
-                                    "explanation": "why this evidence does or does not support the relation",
-                                }
-                            ],
-                        },
-                        "allowed_supporting_evidence_ids": supporting_ids,
-                        "allowed_conflict_evidence_ids": conflict_ids,
-                        "candidate": context.get("candidate", {}),
-                        "packed_context": context.get("packed_context", {}),
-                        "supporting_evidence_candidates": context.get("supporting_evidence_candidates", []),
-                        "conflict_evidence_candidates": context.get("conflict_evidence_candidates", []),
-                    },
-                    ensure_ascii=False,
-                ),
-            },
-        ]
+            ensure_ascii=False,
+        )
+        return LLMRequest(system_prompt=system_prompt, user_prompt=user_prompt, metadata={"candidate_id": context.get("candidate_id", "")})
 
     def _parse_json_output(self, content: str) -> dict[str, Any]:
         try:

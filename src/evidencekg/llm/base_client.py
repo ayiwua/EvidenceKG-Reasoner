@@ -5,6 +5,13 @@ from typing import Any, Protocol
 
 
 @dataclass
+class LLMRequest:
+    system_prompt: str
+    user_prompt: str
+    metadata: dict[str, Any] = field(default_factory=dict)
+
+
+@dataclass
 class LLMResponse:
     provider: str
     model: str
@@ -18,5 +25,5 @@ class BaseLLMClient(Protocol):
     provider: str
     model: str
 
-    def chat(self, messages: list[dict[str, str]], **kwargs: Any) -> LLMResponse:
+    def chat(self, request: LLMRequest, **kwargs: Any) -> LLMResponse:
         ...
