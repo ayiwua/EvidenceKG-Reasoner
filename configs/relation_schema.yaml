@@ -1,0 +1,48 @@
+relations:
+  - name: owned_by
+    description: Service, application, host, or IP is owned or operated by a team.
+    head_types: [service, application, host, ip]
+    tail_types: [team]
+    preferred_sources: [ticket, alert, dns, service_dependency]
+    recall_routes:
+      - schema_type
+      - path_rule
+      - common_neighbor
+      - evidence_cooccurrence
+      - attribute_similarity
+      - source_specific_rule
+    prompt_guidance: Determine whether the team is responsible for the asset or service.
+    semantic_verification_criteria: Evidence must name or operationally assign the head entity to the team.
+    max_candidates: 20
+
+  - name: runs_on
+    description: Service or application runs on an IP or host.
+    head_types: [service, application]
+    tail_types: [ip, host]
+    preferred_sources: [dns, alert, ticket]
+    recall_routes:
+      - schema_type
+      - path_rule
+      - common_neighbor
+      - evidence_cooccurrence
+      - attribute_similarity
+      - source_specific_rule
+    prompt_guidance: Determine whether the service or application is deployed on the host or IP.
+    semantic_verification_criteria: Evidence must connect the runtime service or app to the host or IP.
+    max_candidates: 20
+
+  - name: depends_on
+    description: Service or application depends on another service or application.
+    head_types: [service, application]
+    tail_types: [service, application]
+    preferred_sources: [service_dependency, ticket, alert]
+    recall_routes:
+      - schema_type
+      - path_rule
+      - common_neighbor
+      - evidence_cooccurrence
+      - attribute_similarity
+      - source_specific_rule
+    prompt_guidance: Determine whether the head needs the tail for request handling or data flow.
+    semantic_verification_criteria: Evidence must indicate dependency, call, upstream, downstream, storage, or validation.
+    max_candidates: 20

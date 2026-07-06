@@ -11,3 +11,4 @@ outputs_*/
 outputs_stage3/
 .env
 test.py
+.tmp_agenticopseval/

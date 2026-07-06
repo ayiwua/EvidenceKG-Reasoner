@@ -1,0 +1,5 @@
+ticket_id,title,description,related_service,related_ip,assigned_team,timestamp
+INC-1001,Payment timeout,payment-api on 10.2.3.4 timed out and Payment Team handled the incident,payment-api,10.2.3.4,payment,2026-06-02
+INC-1002,Login token errors,auth-service on 10.2.3.5 returned token errors and Identity Team investigated,auth-service,10.2.3.5,identity,2026-06-03
+INC-1003,Order checkout slow,order-service on 10.2.4.8 was slow and Order Team traced payment-api calls,order-service,10.2.4.8,order,2026-06-04
+INC-1004,Customer data latency,customer-db on 10.9.1.10 had latency and Data Platform Team reviewed database load,customer-db,10.9.1.10,data,2026-06-05

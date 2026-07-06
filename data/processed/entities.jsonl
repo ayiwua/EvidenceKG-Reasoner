@@ -1,0 +1,36 @@
+{"aliases": [], "id": "alert_alt_2001", "name": "ALT-2001", "properties": {"severity": "high"}, "type": "alert"}
+{"aliases": [], "id": "alert_alt_2002", "name": "ALT-2002", "properties": {"severity": "medium"}, "type": "alert"}
+{"aliases": [], "id": "alert_alt_2003", "name": "ALT-2003", "properties": {"severity": "high"}, "type": "alert"}
+{"aliases": [], "id": "alert_alt_2004", "name": "ALT-2004", "properties": {"severity": "critical"}, "type": "alert"}
+{"aliases": [], "id": "app_data_platform", "name": "Data Platform", "properties": {}, "type": "application"}
+{"aliases": [], "id": "app_identity_platform", "name": "Identity Platform", "properties": {}, "type": "application"}
+{"aliases": [], "id": "app_order_platform", "name": "Order Platform", "properties": {}, "type": "application"}
+{"aliases": [], "id": "app_payment_platform", "name": "Payment Platform", "properties": {}, "type": "application"}
+{"aliases": [], "id": "domain_auth_internal_example", "name": "auth.internal.example", "properties": {"record_type": "A", "source": "internal_dns"}, "type": "domain"}
+{"aliases": [], "id": "domain_db_internal_example", "name": "db.internal.example", "properties": {"record_type": "A", "source": "internal_dns"}, "type": "domain"}
+{"aliases": [], "id": "domain_order_internal_example", "name": "order.internal.example", "properties": {"record_type": "A", "source": "internal_dns"}, "type": "domain"}
+{"aliases": [], "id": "domain_payment_internal_example", "name": "payment.internal.example", "properties": {"record_type": "A", "source": "internal_dns"}, "type": "domain"}
+{"aliases": ["asset-auth-01"], "id": "host_auth_prod_01", "name": "auth-prod-01", "properties": {"asset_type": "host", "env": "prod", "region": "us-east"}, "type": "host"}
+{"aliases": ["asset-db-01"], "id": "host_db_prod_01", "name": "db-prod-01", "properties": {"asset_type": "host", "env": "prod", "region": "us-east"}, "type": "host"}
+{"aliases": ["asset-order-01"], "id": "host_order_prod_01", "name": "order-prod-01", "properties": {"asset_type": "host", "env": "prod", "region": "us-east"}, "type": "host"}
+{"aliases": ["asset-pay-01"], "id": "host_pay_prod_01", "name": "pay-prod-01", "properties": {"asset_type": "host", "env": "prod", "region": "us-east"}, "type": "host"}
+{"aliases": [], "id": "ip_10_2_3_4", "name": "10.2.3.4", "properties": {"asset_id": "asset-pay-01", "env": "prod", "region": "us-east"}, "type": "ip"}
+{"aliases": [], "id": "ip_10_2_3_5", "name": "10.2.3.5", "properties": {"asset_id": "asset-auth-01", "env": "prod", "region": "us-east"}, "type": "ip"}
+{"aliases": [], "id": "ip_10_2_4_8", "name": "10.2.4.8", "properties": {"asset_id": "asset-order-01", "env": "prod", "region": "us-east"}, "type": "ip"}
+{"aliases": [], "id": "ip_10_9_1_10", "name": "10.9.1.10", "properties": {"asset_id": "asset-db-01", "env": "prod", "region": "us-east"}, "type": "ip"}
+{"aliases": ["5432/tcp"], "id": "port_5432", "name": "5432", "properties": {"protocol": "tcp"}, "type": "port"}
+{"aliases": ["8080/tcp"], "id": "port_8080", "name": "8080", "properties": {"protocol": "tcp"}, "type": "port"}
+{"aliases": ["8081/tcp"], "id": "port_8081", "name": "8081", "properties": {"protocol": "tcp"}, "type": "port"}
+{"aliases": ["8082/tcp"], "id": "port_8082", "name": "8082", "properties": {"protocol": "tcp"}, "type": "port"}
+{"aliases": ["auth-service"], "id": "svc_auth_service", "name": "auth-service", "properties": {"app_name": "Identity Platform", "port": "8081"}, "type": "service"}
+{"aliases": ["customer-db"], "id": "svc_customer_db", "name": "customer-db", "properties": {"app_name": "Data Platform", "port": "5432"}, "type": "service"}
+{"aliases": ["order-service"], "id": "svc_order_service", "name": "order-service", "properties": {"app_name": "Order Platform", "port": "8082"}, "type": "service"}
+{"aliases": ["payment-api"], "id": "svc_payment_api", "name": "payment-api", "properties": {"app_name": "Payment Platform", "port": "8080"}, "type": "service"}
+{"aliases": ["data"], "id": "team_data", "name": "Data Platform Team", "properties": {"department": "Platform", "oncall_email": "data-oncall@example.com"}, "type": "team"}
+{"aliases": ["identity"], "id": "team_identity", "name": "Identity Team", "properties": {"department": "Platform", "oncall_email": "identity-oncall@example.com"}, "type": "team"}
+{"aliases": ["order"], "id": "team_order", "name": "Order Team", "properties": {"department": "Commerce", "oncall_email": "order-oncall@example.com"}, "type": "team"}
+{"aliases": ["payment"], "id": "team_payment", "name": "Payment Team", "properties": {"department": "FinTech", "oncall_email": "payment-oncall@example.com"}, "type": "team"}
+{"aliases": [], "id": "ticket_inc_1001", "name": "INC-1001", "properties": {"title": "Payment timeout"}, "type": "ticket"}
+{"aliases": [], "id": "ticket_inc_1002", "name": "INC-1002", "properties": {"title": "Login token errors"}, "type": "ticket"}
+{"aliases": [], "id": "ticket_inc_1003", "name": "INC-1003", "properties": {"title": "Order checkout slow"}, "type": "ticket"}
+{"aliases": [], "id": "ticket_inc_1004", "name": "INC-1004", "properties": {"title": "Customer data latency"}, "type": "ticket"}

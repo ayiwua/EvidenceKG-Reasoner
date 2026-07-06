@@ -1,0 +1,7 @@
+{"head": "svc_payment_api", "hide_reason": "evaluation_gold", "relation": "owned_by", "source": "services.csv", "source_row_id": "payment-api", "tail": "team_payment"}
+{"head": "svc_auth_service", "hide_reason": "evaluation_gold", "relation": "owned_by", "source": "services.csv", "source_row_id": "auth-service", "tail": "team_identity"}
+{"head": "svc_order_service", "hide_reason": "evaluation_gold", "relation": "owned_by", "source": "services.csv", "source_row_id": "order-service", "tail": "team_order"}
+{"head": "svc_customer_db", "hide_reason": "evaluation_gold", "relation": "owned_by", "source": "services.csv", "source_row_id": "customer-db", "tail": "team_data"}
+{"head": "svc_order_service", "hide_reason": "evaluation_gold", "relation": "depends_on", "source": "service_dependencies.csv", "source_row_id": "dep_001", "tail": "svc_payment_api"}
+{"head": "svc_payment_api", "hide_reason": "evaluation_gold", "relation": "depends_on", "source": "service_dependencies.csv", "source_row_id": "dep_002", "tail": "svc_auth_service"}
+{"head": "svc_order_service", "hide_reason": "evaluation_gold", "relation": "depends_on", "source": "service_dependencies.csv", "source_row_id": "dep_003", "tail": "svc_customer_db"}

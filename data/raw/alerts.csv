@@ -1,0 +1,5 @@
+alert_id,title,description,related_service,related_ip,assigned_team,severity,timestamp
+ALT-2001,Payment high latency,payment-api latency alert fired on pay-prod-01,payment-api,10.2.3.4,payment,high,2026-06-02
+ALT-2002,Auth error rate,auth-service error rate alert fired on auth-prod-01,auth-service,10.2.3.5,identity,medium,2026-06-03
+ALT-2003,Order dependency failures,order-service saw upstream payment-api failures,order-service,10.2.4.8,order,high,2026-06-04
+ALT-2004,Database saturation,customer-db connection saturation alert fired on db-prod-01,customer-db,10.9.1.10,data,critical,2026-06-05

@@ -1,0 +1,5 @@
+domain,record_type,value,source,timestamp
+payment.internal.example,A,10.2.3.4,internal_dns,2026-06-01
+auth.internal.example,A,10.2.3.5,internal_dns,2026-06-01
+order.internal.example,A,10.2.4.8,internal_dns,2026-06-01
+db.internal.example,A,10.9.1.10,internal_dns,2026-06-01

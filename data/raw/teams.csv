@@ -1,0 +1,5 @@
+team_id,team_name,department,oncall_email
+payment,Payment Team,FinTech,payment-oncall@example.com
+identity,Identity Team,Platform,identity-oncall@example.com
+order,Order Team,Commerce,order-oncall@example.com
+data,Data Platform Team,Platform,data-oncall@example.com

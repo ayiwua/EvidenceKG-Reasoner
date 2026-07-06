@@ -1,0 +1,5 @@
+asset_id,asset_type,ip,hostname,env,region
+asset-pay-01,host,10.2.3.4,pay-prod-01,prod,us-east
+asset-auth-01,host,10.2.3.5,auth-prod-01,prod,us-east
+asset-order-01,host,10.2.4.8,order-prod-01,prod,us-east
+asset-db-01,host,10.9.1.10,db-prod-01,prod,us-east

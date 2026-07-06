@@ -1,0 +1,64 @@
+tables:
+  teams:
+    file: teams.csv
+    entity_type: team
+    id_column: team_id
+    name_column: team_name
+    fields:
+      department: department
+      oncall_email: oncall_email
+
+  assets:
+    file: assets.csv
+    entity_type: host
+    id_column: asset_id
+    name_column: hostname
+    fields:
+      ip: ip
+      env: env
+      region: region
+
+  services:
+    file: services.csv
+    entity_type: service
+    id_column: service_id
+    name_column: service_name
+    fields:
+      owner_team: team
+      host_ip: ip
+      port: port
+
+  dns_records:
+    file: dns_records.csv
+    entity_type: domain
+    id_column: domain
+    fields:
+      value: ip
+
+  tickets:
+    file: tickets.csv
+    entity_type: ticket
+    id_column: ticket_id
+    text_columns: [title, description]
+    related_entity_columns:
+      - related_service
+      - related_ip
+      - assigned_team
+
+  alerts:
+    file: alerts.csv
+    entity_type: alert
+    id_column: alert_id
+    text_columns: [title, description]
+    related_entity_columns:
+      - related_service
+      - related_ip
+      - assigned_team
+
+  service_dependencies:
+    file: service_dependencies.csv
+    entity_type: service_dependency
+    id_column: source_service
+    related_entity_columns:
+      - source_service
+      - target_service

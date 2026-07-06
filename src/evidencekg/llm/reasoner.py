@@ -7,6 +7,7 @@ import time
 from typing import Any, Protocol
 
 from evidencekg.config.task_config import LLMConfig
+from evidencekg.llm.base_client import BaseLLMClient
 from evidencekg.llm.openai_compatible_client import OpenAICompatibleClient
 
 
@@ -189,5 +190,152 @@ class RealLLMReasoner:
         if "no json object" in lowered or "jsondecodeerror" in lowered or "invalid json" in lowered:
             return "parse_failure"
         if "llm request failed" in lowered or "missing api key" in lowered:
+            return "provider_error"
+        return "reasoner_error" if text else ""
+
+
+class LLMReasoner:
+    """v2 structured reasoner using the unified LLMClient interface."""
+
+    def __init__(self, client: BaseLLMClient) -> None:
+        self.client = client
+
+    def predict(self, context: dict[str, Any]) -> dict[str, Any]:
+        messages = self._messages(context)
+        try:
+            response = self.client.chat(messages, context=context)
+            parsed = self._parse_json_output(response.content)
+            result = self._normalize(parsed, context)
+            result["provider_metadata"] = {
+                "provider": response.provider,
+                "model": response.model,
+                "latency_ms": response.latency_ms,
+                "usage": response.usage,
+                "raw": response.raw,
+            }
+            result["raw_response"] = response.content
+            result["parse_error"] = ""
+            return result
+        except Exception as exc:  # noqa: BLE001 - explicit uncertain result for provider/parse failure.
+            return self._uncertain(context, error_type=self._classify_reasoner_error(str(exc)), reason=str(exc))
+
+    def _messages(self, context: dict[str, Any]) -> list[dict[str, str]]:
+        supporting_ids = [item["id"] for item in context.get("supporting_evidence_candidates", [])]
+        conflict_ids = [item["id"] for item in context.get("conflict_evidence_candidates", [])]
+        return [
+            {
+                "role": "system",
+                "content": (
+                    "You are a strict JSON-only relation verification engine. "
+                    "Return exactly one JSON object and no markdown. "
+                    "Required fields: decision, confidence, relation, reason, "
+                    "supporting_evidence_ids, conflict_evidence_ids, evidence_analysis. "
+                    "decision must be accept, reject, or uncertain. confidence must be a number from 0 to 1. "
+                    "supporting_evidence_ids and conflict_evidence_ids must be arrays of strings selected only "
+                    "from the provided allowed evidence ids. If accepting, include at least one supporting evidence id."
+                ),
+            },
+            {
+                "role": "user",
+                "content": json.dumps(
+                    {
+                        "required_output_schema": {
+                            "decision": "accept | reject | uncertain",
+                            "confidence": 0.0,
+                            "relation": context.get("candidate", {}).get("relation", ""),
+                            "reason": "short evidence-grounded explanation",
+                            "supporting_evidence_ids": [],
+                            "conflict_evidence_ids": [],
+                            "evidence_analysis": [
+                                {
+                                    "evidence_id": "one allowed evidence id",
+                                    "support_label": "strong_support | weak_support | irrelevant | conflict",
+                                    "explanation": "why this evidence does or does not support the relation",
+                                }
+                            ],
+                        },
+                        "allowed_supporting_evidence_ids": supporting_ids,
+                        "allowed_conflict_evidence_ids": conflict_ids,
+                        "candidate": context.get("candidate", {}),
+                        "packed_context": context.get("packed_context", {}),
+                        "supporting_evidence_candidates": context.get("supporting_evidence_candidates", []),
+                        "conflict_evidence_candidates": context.get("conflict_evidence_candidates", []),
+                    },
+                    ensure_ascii=False,
+                ),
+            },
+        ]
+
+    def _parse_json_output(self, content: str) -> dict[str, Any]:
+        try:
+            return json.loads(content)
+        except json.JSONDecodeError:
+            match = re.search(r"\{.*\}", content, flags=re.DOTALL)
+            if not match:
+                raise ValueError("no JSON object found in LLM response")
+            return json.loads(match.group(0))
+
+    def _normalize(self, payload: dict[str, Any], context: dict[str, Any]) -> dict[str, Any]:
+        candidate = context.get("candidate", {})
+        decision = str(payload.get("decision", "uncertain")).lower()
+        if decision not in {"accept", "reject", "uncertain"}:
+            decision = "uncertain"
+        try:
+            confidence = float(payload.get("confidence", 0.0))
+        except (TypeError, ValueError):
+            confidence = 0.0
+        supporting = payload.get("supporting_evidence_ids", [])
+        conflict = payload.get("conflict_evidence_ids", [])
+        analysis = payload.get("evidence_analysis", [])
+        if not isinstance(supporting, list):
+            supporting = []
+        if not isinstance(conflict, list):
+            conflict = []
+        if not isinstance(analysis, list):
+            analysis = []
+        return {
+            "prediction_id": "",
+            "candidate_id": context.get("candidate_id", ""),
+            "head": candidate.get("head", ""),
+            "relation": str(payload.get("relation") or candidate.get("relation", "")),
+            "tail": candidate.get("tail", ""),
+            "decision": decision,
+            "confidence": round(max(0.0, min(1.0, confidence)), 3),
+            "reason": str(payload.get("reason", "")),
+            "supporting_evidence_ids": [str(item) for item in supporting],
+            "conflict_evidence_ids": [str(item) for item in conflict],
+            "evidence_analysis": analysis,
+            "error_type": "",
+            "fallback_reason": "",
+        }
+
+    def _uncertain(self, context: dict[str, Any], error_type: str, reason: str) -> dict[str, Any]:
+        candidate = context.get("candidate", {})
+        return {
+            "prediction_id": "",
+            "candidate_id": context.get("candidate_id", ""),
+            "head": candidate.get("head", ""),
+            "relation": candidate.get("relation", ""),
+            "tail": candidate.get("tail", ""),
+            "decision": "uncertain",
+            "confidence": 0.0,
+            "reason": reason,
+            "supporting_evidence_ids": [],
+            "conflict_evidence_ids": [],
+            "evidence_analysis": [],
+            "error_type": error_type,
+            "fallback_reason": "llm_reasoner_failed",
+            "provider_metadata": {},
+            "raw_response": "",
+            "parse_error": reason if error_type == "parse_failure" else "",
+        }
+
+    def _classify_reasoner_error(self, text: str) -> str:
+        lowered = text.lower()
+        if "timed out" in lowered or "timeout" in lowered:
+            return "timeout"
+        if "no json object" in lowered or "jsondecodeerror" in lowered or "invalid json" in lowered:
+            return "parse_failure"
+        if "missing api key" in lowered or "provider" in lowered or "response missing content" in lowered:
             return "provider_error"
         return "reasoner_error" if text else ""

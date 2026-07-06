@@ -1,0 +1,5 @@
+service_id,service_name,app_name,owner_team,host_ip,port
+payment-api,payment-api,Payment Platform,payment,10.2.3.4,8080
+auth-service,auth-service,Identity Platform,identity,10.2.3.5,8081
+order-service,order-service,Order Platform,order,10.2.4.8,8082
+customer-db,customer-db,Data Platform,data,10.9.1.10,5432
