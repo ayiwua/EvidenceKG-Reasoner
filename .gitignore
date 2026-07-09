@@ -13,3 +13,4 @@ outputs_stage3/
 test.py
 .tmp_agenticopseval/
 docs/legacy/
+data/raw/redocred/
