@@ -1,6 +1,6 @@
 # Re-DocRED 数据集适配与完整流程改造设计文档
 
-本文档基于当前 `EvidenceKG-Reasoner` 仓库现状，设计一条面向 Re-DocRED 的文档级多关系证据推理流程。目标不是一次性替换现有企业资产 KG pipeline，而是在保留原任务的前提下，新增一条 Re-DocRED 专用数据适配、候选验证、证据检索、LLM 推理、Verifier 和评测流程。
+本文档基于当前 `EvidenceKG-Reasoner` 仓库现状，设计一条面向 Re-DocRED 的文档级多关系证据推理流程。Re-DocRED 是后续主研究和主开发方向；旧 enterprise asset hidden edge recovery pipeline 暂时保留为 legacy/reference，只用于理解第一版流程和借鉴少量工具代码，不作为新 pipeline 的长期并行主线或强兼容目标。
 
 目标任务：
 
